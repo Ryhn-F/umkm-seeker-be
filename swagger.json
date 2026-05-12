@@ -1,0 +1,171 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "UMKM Seeker API",
+    "version": "1.0.0",
+    "description": "API Documentation for UMKM Seeker. It includes Authentication, Products, Orders, and UMKM endpoints."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Development Server"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Enter your JWT token in the format: Bearer <token>"
+      }
+    }
+  },
+  "paths": {
+    "/login": {
+      "post": {
+        "summary": "Login user",
+        "tags": ["Auth"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "string", "example": "test@example.com" },
+                  "password": { "type": "string", "example": "password123" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login successful",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Login successful",
+                  "data": {
+                    "user": { "id": 1, "email": "test@example.com" },
+                    "token": "eyJhbGciOiJIUz..."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/logout": {
+      "post": {
+        "summary": "Logout user",
+        "tags": ["Auth"],
+        "responses": {
+          "200": { "description": "Logout successful" }
+        }
+      }
+    },
+    "/product": {
+      "get": {
+        "summary": "Get all products",
+        "tags": ["Products"],
+        "responses": {
+          "200": { "description": "Returns array of products" }
+        }
+      }
+    },
+    "/product/{id}": {
+      "get": {
+        "summary": "Get product by ID",
+        "tags": ["Products"],
+        "parameters": [
+          { "in": "path", "name": "id", "required": true, "schema": { "type": "integer" }, "example": 1 }
+        ],
+        "responses": {
+          "200": { "description": "Returns the product details" }
+        }
+      }
+    },
+    "/product/create-product": {
+      "post": {
+        "summary": "Create a new product",
+        "tags": ["Products"],
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "business_id": { "type": "integer", "example": 1 },
+                  "name": { "type": "string", "example": "Kopi Susu" },
+                  "stock": { "type": "integer", "example": 100 },
+                  "price": { "type": "number", "example": 15000 },
+                  "description": { "type": "string", "example": "Kopi susu gula aren" },
+                  "image": { "type": "string", "example": "https://example.com/kopi.jpg" },
+                  "category": { "type": "string", "example": "Beverage" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Product created successfully" }
+        }
+      }
+    },
+    "/order": {
+      "post": {
+        "summary": "Create a new order",
+        "tags": ["Orders"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "person_name": { "type": "string", "example": "John Doe" },
+                  "no_telp": { "type": "string", "example": "08123456789" },
+                  "id_product": { "type": "array", "items": { "type": "integer" }, "example": [1, 2] },
+                  "quantity": { "type": "array", "items": { "type": "integer" }, "example": [4, 2] }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Order created successfully" }
+        }
+      }
+    },
+    "/order/{business_id}": {
+      "get": {
+        "summary": "Get all orders for a business",
+        "tags": ["Orders"],
+        "parameters": [
+          { "in": "path", "name": "business_id", "required": true, "schema": { "type": "integer" }, "example": 1 }
+        ],
+        "responses": {
+          "200": { "description": "Returns array of orders belonging to the specified business" }
+        }
+      }
+    },
+    "/umkm/{id}": {
+      "get": {
+        "summary": "Get UMKM (Business) by ID",
+        "tags": ["UMKM"],
+        "parameters": [
+          { "in": "path", "name": "id", "required": true, "schema": { "type": "integer" }, "example": 1 }
+        ],
+        "responses": {
+          "200": { "description": "Returns UMKM details" }
+        }
+      }
+    }
+  }
+}

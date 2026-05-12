@@ -1,8 +1,9 @@
 const umkmServices = require("../services/umkm.services");
 
-const getUmkms = async (req, res) => {
+const getUmkmsbyId = async (req, res) => {
   try {
-    const umkms = await umkmServices.getUmkms();
+    const { id } = req.params;
+    const umkms = await umkmServices.getUmkmsbyId(id);
 
     res.status(200).json({
       success: true,
@@ -17,5 +18,5 @@ const getUmkms = async (req, res) => {
 };
 
 module.exports = {
-  getUmkms,
+  getUmkmsbyId,
 };

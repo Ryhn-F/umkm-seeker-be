@@ -1,7 +1,11 @@
 const supabase = require("../config/supabase");
 
-const getUmkms = async () => {
-  const { data, error } = await supabase.from("businesses").select("*");
+const getUmkmsbyId = async (id) => {
+  const { data, error } = await supabase
+    .from("businesses")
+    .select("*")
+    .eq("id", id)
+    .single();
 
   if (error) {
     throw new Error(error.message);
@@ -11,5 +15,5 @@ const getUmkms = async () => {
 };
 
 module.exports = {
-  getUmkms,
+  getUmkmsbyId,
 };
