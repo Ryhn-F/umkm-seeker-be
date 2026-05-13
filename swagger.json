@@ -53,6 +53,7 @@
                       "id": 1,
                       "username": "johndoe",
                       "email": "test@example.com",
+                      "ktp_image_url": "https://res.cloudinary.com/.../ktp/abc123.jpg",
                       "id_business": 1,
                       "business": {
                         "id": 1,
@@ -63,7 +64,11 @@
                         "description": "Warung kopi terbaik",
                         "email": "warung@example.com",
                         "instagram": "@warungkopi",
-                        "no_telp": "08123456789"
+                        "no_telp": "08123456789",
+                        "province": "Jawa Barat",
+                        "regency": "Bandung",
+                        "district": "Coblong",
+                        "logo_image_url": "https://res.cloudinary.com/.../logos/logo123.jpg"
                       }
                     },
                     "token": "eyJhbGciOiJIUz..."
@@ -73,6 +78,75 @@
             }
           },
           "401": { "description": "Invalid email or password" }
+        }
+      }
+    },
+    "/register": {
+      "post": {
+        "summary": "Register user and business",
+        "description": "Registers a new user and creates an associated business. Images (foto_ktp and foto_logo_umkm) are uploaded to Cloudinary. Send as multipart/form-data.",
+        "tags": ["Auth"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": ["nama_pemilik", "email", "password", "nama_umkm", "no_telp", "kategori", "alamat", "province", "regency", "district", "foto_ktp", "foto_logo_umkm"],
+                "properties": {
+                  "nama_pemilik": { "type": "string", "example": "John Doe", "description": "Owner name" },
+                  "email": { "type": "string", "example": "john@example.com", "description": "Email address" },
+                  "password": { "type": "string", "example": "password123", "description": "Account password" },
+                  "nama_umkm": { "type": "string", "example": "Warung Kopi", "description": "Business name" },
+                  "no_telp": { "type": "string", "example": "08123456789", "description": "Phone number" },
+                  "kategori": { "type": "string", "example": "Food & Beverage", "description": "Business category" },
+                  "alamat": { "type": "string", "example": "Jl. Contoh No. 1", "description": "Business address" },
+                  "province": { "type": "string", "example": "Jawa Barat", "description": "Province" },
+                  "regency": { "type": "string", "example": "Bandung", "description": "Regency / City" },
+                  "district": { "type": "string", "example": "Coblong", "description": "District" },
+                  "foto_ktp": { "type": "string", "format": "binary", "description": "KTP image file (jpg, jpeg, png, webp)" },
+                  "foto_logo_umkm": { "type": "string", "format": "binary", "description": "UMKM logo image file (jpg, jpeg, png, webp)" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Registration successful",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true,
+                  "message": "Registration successful",
+                  "data": {
+                    "user": {
+                      "id": 1,
+                      "username": "John Doe",
+                      "email": "john@example.com",
+                      "ktp_image_url": "https://res.cloudinary.com/.../ktp/abc123.jpg",
+                      "id_business": 1
+                    },
+                    "business": {
+                      "id": 1,
+                      "name": "Warung Kopi",
+                      "alamat": "Jl. Contoh No. 1",
+                      "category": "Food & Beverage",
+                      "helder": "John Doe",
+                      "email": "john@example.com",
+                      "no_telp": "08123456789",
+                      "province": "Jawa Barat",
+                      "regency": "Bandung",
+                      "district": "Coblong",
+                      "logo_image_url": "https://res.cloudinary.com/.../logos/logo123.jpg"
+                    },
+                    "token": "eyJhbGciOiJIUz..."
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "Missing required fields, email already registered, or missing image uploads" }
         }
       }
     },
@@ -254,7 +328,11 @@
                   "description": { "type": "string", "example": "Updated business description" },
                   "email": { "type": "string", "example": "new@example.com" },
                   "instagram": { "type": "string", "example": "@newhandle" },
-                  "no_telp": { "type": "string", "example": "08198765432" }
+                  "no_telp": { "type": "string", "example": "08198765432" },
+                  "province": { "type": "string", "example": "Jawa Barat" },
+                  "regency": { "type": "string", "example": "Bandung" },
+                  "district": { "type": "string", "example": "Coblong" },
+                  "logo_image_url": { "type": "string", "example": "https://res.cloudinary.com/.../logos/logo123.jpg" }
                 }
               }
             }
