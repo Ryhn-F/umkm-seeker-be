@@ -53,7 +53,7 @@ const createProduct = async (payload) => {
 const getProductsByBusinessId = async (businessId) => {
   const { data, error } = await supabase
     .from("products")
-    .select("*")
+    .select("*, business:businesses!business_id(province, regency, district)")
     .eq("business_id", businessId);
 
   if (error) {
