@@ -36,7 +36,7 @@ const createProduct = async (payload) => {
         stock: payload.stock,
         price: payload.price,
         description: payload.description,
-        image_url: payload.image, // mapping image to image_url
+        image_url: payload.image_url,
         category: payload.category,
       },
     ])
@@ -50,8 +50,56 @@ const createProduct = async (payload) => {
   return data;
 };
 
+const getProductsByBusinessId = async (businessId) => {
+  const { data, error } = await supabase
+    .from("products")
+    .select("*")
+    .eq("business_id", businessId);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data;
+};
+
+const updateProduct = async (productId, businessId, updateData) => {
+  const { data, error } = await supabase
+    .from("products")
+    .update(updateData)
+    .eq("id", productId)
+    .eq("business_id", businessId)
+    .select("*")
+    .single();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data;
+};
+
+const deleteProduct = async (productId, businessId) => {
+  const { data, error } = await supabase
+    .from("products")
+    .delete()
+    .eq("id", productId)
+    .eq("business_id", businessId)
+    .select("*")
+    .single();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data;
+};
+
 module.exports = {
   getProducts,
   getProductById,
   createProduct,
+  getProductsByBusinessId,
+  updateProduct,
+  deleteProduct,
 };

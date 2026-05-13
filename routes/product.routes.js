@@ -2,10 +2,13 @@ const express = require("express");
 const router = express.Router();
 const productController = require("../controllers/product.controller");
 const { verifyToken } = require("../middlewares/auth.middleware");
+const { upload } = require("../config/cloudinary");
 
-// Also adding RESTful standard paths
 router.get("/", productController.getProducts);
-router.post("/create-product", verifyToken, productController.createProduct);
+router.post("/create-product", verifyToken, upload.single("image"), productController.createProduct);
+router.get("/business/:businessId", productController.getProductsByBusinessId);
+router.put("/:id", verifyToken, productController.updateProduct);
+router.delete("/:id", verifyToken, productController.deleteProduct);
 router.get("/:id", productController.getProductById);
 
 module.exports = router;

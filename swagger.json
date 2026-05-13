@@ -49,13 +49,30 @@
                   "success": true,
                   "message": "Login successful",
                   "data": {
-                    "user": { "id": 1, "email": "test@example.com" },
+                    "user": {
+                      "id": 1,
+                      "username": "johndoe",
+                      "email": "test@example.com",
+                      "id_business": 1,
+                      "business": {
+                        "id": 1,
+                        "name": "Warung Kopi",
+                        "alamat": "Jl. Contoh No. 1",
+                        "category": "Food & Beverage",
+                        "helder": "John Doe",
+                        "description": "Warung kopi terbaik",
+                        "email": "warung@example.com",
+                        "instagram": "@warungkopi",
+                        "no_telp": "08123456789"
+                      }
+                    },
                     "token": "eyJhbGciOiJIUz..."
                   }
                 }
               }
             }
-          }
+          },
+          "401": { "description": "Invalid email or password" }
         }
       }
     },
@@ -73,7 +90,52 @@
         "summary": "Get all products",
         "tags": ["Products"],
         "responses": {
-          "200": { "description": "Returns array of products" }
+          "200": { "description": "Returns array of products (id, name, image_url, category, price)" }
+        }
+      }
+    },
+    "/product/create-product": {
+      "post": {
+        "summary": "Create a new product",
+        "description": "Creates a new product with an image uploaded to Cloudinary. Send as multipart/form-data.",
+        "tags": ["Products"],
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": ["business_id", "name", "stock", "price", "description", "category"],
+                "properties": {
+                  "business_id": { "type": "integer", "example": 1 },
+                  "name": { "type": "string", "example": "Kopi Susu" },
+                  "stock": { "type": "integer", "example": 100 },
+                  "price": { "type": "number", "example": 15000 },
+                  "description": { "type": "string", "example": "Kopi susu gula aren" },
+                  "image": { "type": "string", "format": "binary", "description": "Product image file (jpg, jpeg, png, webp)" },
+                  "category": { "type": "string", "example": "Beverage" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Product created successfully" },
+          "400": { "description": "Missing required fields" },
+          "403": { "description": "Token required" }
+        }
+      }
+    },
+    "/product/business/{businessId}": {
+      "get": {
+        "summary": "Get products by business ID",
+        "tags": ["Products"],
+        "parameters": [
+          { "in": "path", "name": "businessId", "required": true, "schema": { "type": "integer" }, "example": 1 }
+        ],
+        "responses": {
+          "200": { "description": "Returns array of products belonging to the specified business" }
         }
       }
     },
@@ -85,15 +147,18 @@
           { "in": "path", "name": "id", "required": true, "schema": { "type": "integer" }, "example": 1 }
         ],
         "responses": {
-          "200": { "description": "Returns the product details" }
+          "200": { "description": "Returns the product details" },
+          "404": { "description": "Product not found" }
         }
-      }
-    },
-    "/product/create-product": {
-      "post": {
-        "summary": "Create a new product",
+      },
+      "put": {
+        "summary": "Update a product",
+        "description": "Updates a product. Only the owner (by business_id in JWT) can update their products.",
         "tags": ["Products"],
         "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "in": "path", "name": "id", "required": true, "schema": { "type": "integer" }, "example": 1 }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -101,12 +166,10 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "business_id": { "type": "integer", "example": 1 },
-                  "name": { "type": "string", "example": "Kopi Susu" },
-                  "stock": { "type": "integer", "example": 100 },
-                  "price": { "type": "number", "example": 15000 },
-                  "description": { "type": "string", "example": "Kopi susu gula aren" },
-                  "image": { "type": "string", "example": "https://example.com/kopi.jpg" },
+                  "name": { "type": "string", "example": "Kopi Susu Updated" },
+                  "stock": { "type": "integer", "example": 50 },
+                  "price": { "type": "number", "example": 18000 },
+                  "description": { "type": "string", "example": "Updated description" },
                   "category": { "type": "string", "example": "Beverage" }
                 }
               }
@@ -114,7 +177,23 @@
           }
         },
         "responses": {
-          "201": { "description": "Product created successfully" }
+          "200": { "description": "Product updated successfully" },
+          "400": { "description": "No business associated with this account" },
+          "403": { "description": "Token required" }
+        }
+      },
+      "delete": {
+        "summary": "Delete a product",
+        "description": "Deletes a product. Only the owner (by business_id in JWT) can delete their products.",
+        "tags": ["Products"],
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "in": "path", "name": "id", "required": true, "schema": { "type": "integer" }, "example": 1 }
+        ],
+        "responses": {
+          "200": { "description": "Product deleted successfully" },
+          "400": { "description": "No business associated with this account" },
+          "403": { "description": "Token required" }
         }
       }
     },
@@ -152,6 +231,39 @@
         ],
         "responses": {
           "200": { "description": "Returns array of orders belonging to the specified business" }
+        }
+      }
+    },
+    "/umkm/business": {
+      "put": {
+        "summary": "Update business",
+        "description": "Updates the business associated with the authenticated user's account (via id_business in JWT).",
+        "tags": ["UMKM"],
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string", "example": "Warung Kopi Baru" },
+                  "alamat": { "type": "string", "example": "Jl. Baru No. 10" },
+                  "category": { "type": "string", "example": "Food & Beverage" },
+                  "helder": { "type": "string", "example": "John Doe" },
+                  "description": { "type": "string", "example": "Updated business description" },
+                  "email": { "type": "string", "example": "new@example.com" },
+                  "instagram": { "type": "string", "example": "@newhandle" },
+                  "no_telp": { "type": "string", "example": "08198765432" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Business updated successfully" },
+          "400": { "description": "No business associated with this account" },
+          "403": { "description": "Token required" }
         }
       }
     },
