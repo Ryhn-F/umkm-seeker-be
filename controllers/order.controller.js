@@ -2,7 +2,17 @@ const orderServices = require("../services/order.services");
 
 const createOrder = async (req, res) => {
   try {
-    const { person_name, no_telp, id_product, quantity } = req.body;
+    const { 
+      person_name, 
+      no_telp, 
+      id_product, 
+      quantity,
+      seat_id,
+      guest_count,
+      reservation_date,
+      reservation_time,
+      reservation_end_time
+    } = req.body;
 
     // Validation for required fields
     if (!person_name || !no_telp || !id_product || !quantity) {
@@ -11,6 +21,17 @@ const createOrder = async (req, res) => {
         message:
           "Missing required fields: person_name, no_telp, id_product, or quantity",
       });
+    }
+
+    // If any reservation field is provided, ensure all are provided
+    if (seat_id || reservation_date || reservation_time || reservation_end_time) {
+      if (!seat_id || !reservation_date || !reservation_time || !reservation_end_time) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Missing reservation fields: seat_id, reservation_date, reservation_time, and reservation_end_time are all required when making a reservation",
+        });
+      }
     }
 
     // Validation for arrays and their lengths
@@ -38,6 +59,11 @@ const createOrder = async (req, res) => {
       no_telp,
       id_product,
       quantity,
+      seat_id,
+      guest_count,
+      reservation_date,
+      reservation_time,
+      reservation_end_time
     );
 
     res.status(201).json({
@@ -55,16 +81,7 @@ const createOrder = async (req, res) => {
 
 const getOrders = async (req, res) => {
   try {
-    const { business_id } = req.params;
-
-    if (!business_id) {
-      return res.status(400).json({
-        success: false,
-        message: "business_id is required as a query parameter",
-      });
-    }
-
-    const orders = await orderServices.getOrdersByBusinessId(business_id);
+    const orders = await orderServices.getOrders();
 
     res.status(200).json({
       success: true,

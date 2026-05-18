@@ -28,48 +28,20 @@ const login = async (req, res) => {
 
 const register = async (req, res) => {
   try {
-    const { nama_pemilik, email, password, nama_umkm, no_telp, kategori, alamat, province, regency, district } = req.body;
+    const { username, email, password } = req.body;
 
     // Validate required fields
-    if (!nama_pemilik || !email || !password || !nama_umkm || !no_telp || !kategori || !alamat || !province || !regency || !district) {
+    if (!username || !email || !password) {
       return res.status(400).json({
         success: false,
-        message: "All fields are required: nama_pemilik, email, password, nama_umkm, no_telp, kategori, alamat, province, regency, district",
+        message: "All fields are required: username, email, password",
       });
     }
-
-    // Validate image uploads
-    if (!req.files || !req.files.foto_ktp || !req.files.foto_ktp[0]) {
-      return res.status(400).json({
-        success: false,
-        message: "foto_ktp is required",
-      });
-    }
-
-    if (!req.files || !req.files.foto_logo_umkm || !req.files.foto_logo_umkm[0]) {
-      return res.status(400).json({
-        success: false,
-        message: "foto_logo_umkm is required",
-      });
-    }
-
-    // Get Cloudinary URLs from uploaded files
-    const ktp_image_url = req.files.foto_ktp[0].path;
-    const logo_image_url = req.files.foto_logo_umkm[0].path;
 
     const result = await authServices.register({
-      nama_pemilik,
+      username,
       email,
       password,
-      nama_umkm,
-      no_telp,
-      kategori,
-      alamat,
-      province,
-      regency,
-      district,
-      ktp_image_url,
-      logo_image_url,
     });
 
     res.status(201).json({

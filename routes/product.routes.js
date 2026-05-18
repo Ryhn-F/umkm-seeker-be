@@ -6,7 +6,6 @@ const { upload } = require("../config/cloudinary");
 
 router.get("/", productController.getProducts);
 router.post("/create-product", verifyToken, upload.single("image"), productController.createProduct);
-router.get("/business/:businessId", productController.getProductsByBusinessId);
 router.put("/:id", verifyToken, productController.updateProduct);
 router.delete("/:id", verifyToken, productController.deleteProduct);
 router.get("/:id", productController.getProductById);

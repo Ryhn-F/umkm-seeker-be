@@ -4,12 +4,14 @@ const express = require("express");
 const swaggerUi = require("swagger-ui-express");
 const swaggerDocument = require("./swagger.json");
 
-const umkmRoutes = require("./routes/umkm.routes");
 const productRoutes = require("./routes/product.routes");
 const orderRoutes = require("./routes/order.routes");
 const authRoutes = require("./routes/auth.routes");
 
 const app = express();
+
+const cors = require("cors");
+app.use(cors());
 
 app.use(express.json());
 
@@ -17,7 +19,6 @@ app.use(express.json());
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.use("/", authRoutes);
-app.use("/umkm", umkmRoutes);
 app.use("/product", productRoutes);
 app.use("/order", orderRoutes);
 

@@ -1,6 +1,53 @@
 const supabase = require("../config/supabase");
 
-const createOrder = async (person_name, no_telp, id_products, quantities) => {
+const createOrder = async (
+  person_name,
+  no_telp,
+  id_products,
+  quantities,
+  seat_id,
+  guest_count,
+  reservation_date,
+  reservation_time,
+  reservation_end_time
+) => {
+  // Check for reservation overlap if reservation details are provided
+  if (seat_id && reservation_date && reservation_time && reservation_end_time) {
+    // Check if the seat exists
+    const { data: seat, error: seatError } = await supabase
+      .from("seats")
+      .select("id, capacity")
+      .eq("id", seat_id)
+      .maybeSingle();
+
+    if (seatError || !seat) {
+      throw new Error("Invalid seat_id");
+    }
+
+    if (guest_count > seat.capacity) {
+      throw new Error(`Guest count exceeds seat capacity of ${seat.capacity}`);
+    }
+
+    // Check for overlap
+    // An overlap occurs if existing_start < new_end AND existing_end > new_start
+    const { data: overlappingOrders, error: overlapError } = await supabase
+      .from("orders")
+      .select("id")
+      .eq("seat_id", seat_id)
+      .eq("reservation_date", reservation_date)
+      .neq("status", "cancelled")
+      .lt("reservation_time", reservation_end_time)
+      .gt("reservation_end_time", reservation_time);
+
+    if (overlapError) {
+      throw new Error("Error checking for overlapping reservations: " + overlapError.message);
+    }
+
+    if (overlappingOrders && overlappingOrders.length > 0) {
+      throw new Error("Seat is already reserved for the requested time");
+    }
+  }
+
   // 1. Fetch prices and stock for the requested products
   const { data: products, error: productsError } = await supabase
     .from("products")
@@ -52,6 +99,11 @@ const createOrder = async (person_name, no_telp, id_products, quantities) => {
         no_telp,
         total_price,
         status: "pending",
+        seat_id: seat_id || null,
+        guest_count: guest_count || 1,
+        reservation_date: reservation_date || null,
+        reservation_time: reservation_time || null,
+        reservation_end_time: reservation_end_time || null,
       },
     ])
     .select()
@@ -91,44 +143,18 @@ const createOrder = async (person_name, no_telp, id_products, quantities) => {
   return order;
 };
 
-const getOrdersByBusinessId = async (business_id) => {
-  // 1. Get all products for the business
-  const { data: products, error: productsError } = await supabase
-    .from("products")
-    .select("id")
-    .eq("business_id", business_id);
-
-  if (productsError) {
-    throw new Error(productsError.message);
-  }
-
-  if (!products || products.length === 0) {
-    return [];
-  }
-
-  const productIds = products.map((p) => p.id);
-
-  // 2. Get order items containing these products
-  const { data: orderItems, error: itemsError } = await supabase
-    .from("order_items")
-    .select("order_id")
-    .in("product_id", productIds);
-
-  if (itemsError) {
-    throw new Error(itemsError.message);
-  }
-
-  if (!orderItems || orderItems.length === 0) {
-    return [];
-  }
-
-  const orderIds = [...new Set(orderItems.map((item) => item.order_id))];
-
-  // 3. Get the full orders with their items and products details
+const getOrders = async () => {
+  // Get all orders with their items and products details
   const { data: orders, error: ordersError } = await supabase
     .from("orders")
     .select(`
       *,
+      seats (
+        id,
+        seat_number,
+        capacity,
+        status
+      ),
       order_items (
         id,
         quantity,
@@ -137,33 +163,20 @@ const getOrdersByBusinessId = async (business_id) => {
           id,
           name,
           image_url,
-          category,
-          business_id
+          category
         )
       )
     `)
-    .in("id", orderIds)
     .order("created_at", { ascending: false });
 
   if (ordersError) {
     throw new Error(ordersError.message);
   }
 
-  // 4. Filter out items that don't belong to this business (in case of mixed orders)
-  const businessIdNum = parseInt(business_id, 10);
-  const filteredOrders = orders.map((order) => {
-    return {
-      ...order,
-      order_items: order.order_items.filter(
-        (item) => item.products && item.products.business_id === businessIdNum
-      ),
-    };
-  });
-
-  return filteredOrders;
+  return orders;
 };
 
 module.exports = {
   createOrder,
-  getOrdersByBusinessId,
+  getOrders,
 };

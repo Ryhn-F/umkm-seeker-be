@@ -3,7 +3,7 @@
   "info": {
     "title": "UMKM Seeker API",
     "version": "1.0.0",
-    "description": "API Documentation for UMKM Seeker. It includes Authentication, Products, Orders, and UMKM endpoints."
+    "description": "API Documentation for UMKM Seeker. It includes Authentication, Products, and Orders endpoints."
   },
   "servers": [
     {
@@ -52,24 +52,7 @@
                     "user": {
                       "id": 1,
                       "username": "johndoe",
-                      "email": "test@example.com",
-                      "ktp_image_url": "https://res.cloudinary.com/.../ktp/abc123.jpg",
-                      "id_business": 1,
-                      "business": {
-                        "id": 1,
-                        "name": "Warung Kopi",
-                        "alamat": "Jl. Contoh No. 1",
-                        "category": "Food & Beverage",
-                        "helder": "John Doe",
-                        "description": "Warung kopi terbaik",
-                        "email": "warung@example.com",
-                        "instagram": "@warungkopi",
-                        "no_telp": "08123456789",
-                        "province": "Jawa Barat",
-                        "regency": "Bandung",
-                        "district": "Coblong",
-                        "logo_image_url": "https://res.cloudinary.com/.../logos/logo123.jpg"
-                      }
+                      "email": "test@example.com"
                     },
                     "token": "eyJhbGciOiJIUz..."
                   }
@@ -83,29 +66,20 @@
     },
     "/register": {
       "post": {
-        "summary": "Register user and business",
-        "description": "Registers a new user and creates an associated business. Images (foto_ktp and foto_logo_umkm) are uploaded to Cloudinary. Send as multipart/form-data.",
+        "summary": "Register user",
+        "description": "Registers a new user.",
         "tags": ["Auth"],
         "requestBody": {
           "required": true,
           "content": {
-            "multipart/form-data": {
+            "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["nama_pemilik", "email", "password", "nama_umkm", "no_telp", "kategori", "alamat", "province", "regency", "district", "foto_ktp", "foto_logo_umkm"],
+                "required": ["username", "email", "password"],
                 "properties": {
-                  "nama_pemilik": { "type": "string", "example": "John Doe", "description": "Owner name" },
+                  "username": { "type": "string", "example": "John Doe", "description": "Username" },
                   "email": { "type": "string", "example": "john@example.com", "description": "Email address" },
-                  "password": { "type": "string", "example": "password123", "description": "Account password" },
-                  "nama_umkm": { "type": "string", "example": "Warung Kopi", "description": "Business name" },
-                  "no_telp": { "type": "string", "example": "08123456789", "description": "Phone number" },
-                  "kategori": { "type": "string", "example": "Food & Beverage", "description": "Business category" },
-                  "alamat": { "type": "string", "example": "Jl. Contoh No. 1", "description": "Business address" },
-                  "province": { "type": "string", "example": "Jawa Barat", "description": "Province" },
-                  "regency": { "type": "string", "example": "Bandung", "description": "Regency / City" },
-                  "district": { "type": "string", "example": "Coblong", "description": "District" },
-                  "foto_ktp": { "type": "string", "format": "binary", "description": "KTP image file (jpg, jpeg, png, webp)" },
-                  "foto_logo_umkm": { "type": "string", "format": "binary", "description": "UMKM logo image file (jpg, jpeg, png, webp)" }
+                  "password": { "type": "string", "example": "password123", "description": "Account password" }
                 }
               }
             }
@@ -123,22 +97,7 @@
                     "user": {
                       "id": 1,
                       "username": "John Doe",
-                      "email": "john@example.com",
-                      "ktp_image_url": "https://res.cloudinary.com/.../ktp/abc123.jpg",
-                      "id_business": 1
-                    },
-                    "business": {
-                      "id": 1,
-                      "name": "Warung Kopi",
-                      "alamat": "Jl. Contoh No. 1",
-                      "category": "Food & Beverage",
-                      "helder": "John Doe",
-                      "email": "john@example.com",
-                      "no_telp": "08123456789",
-                      "province": "Jawa Barat",
-                      "regency": "Bandung",
-                      "district": "Coblong",
-                      "logo_image_url": "https://res.cloudinary.com/.../logos/logo123.jpg"
+                      "email": "john@example.com"
                     },
                     "token": "eyJhbGciOiJIUz..."
                   }
@@ -146,7 +105,7 @@
               }
             }
           },
-          "400": { "description": "Missing required fields, email already registered, or missing image uploads" }
+          "400": { "description": "Missing required fields or email already registered" }
         }
       }
     },
@@ -180,9 +139,8 @@
             "multipart/form-data": {
               "schema": {
                 "type": "object",
-                "required": ["business_id", "name", "stock", "price", "description", "category"],
+                "required": ["name", "stock", "price", "description", "category"],
                 "properties": {
-                  "business_id": { "type": "integer", "example": 1 },
                   "name": { "type": "string", "example": "Kopi Susu" },
                   "stock": { "type": "integer", "example": 100 },
                   "price": { "type": "number", "example": 15000 },
@@ -201,18 +159,6 @@
         }
       }
     },
-    "/product/business/{businessId}": {
-      "get": {
-        "summary": "Get products by business ID",
-        "tags": ["Products"],
-        "parameters": [
-          { "in": "path", "name": "businessId", "required": true, "schema": { "type": "integer" }, "example": 1 }
-        ],
-        "responses": {
-          "200": { "description": "Returns array of products belonging to the specified business" }
-        }
-      }
-    },
     "/product/{id}": {
       "get": {
         "summary": "Get product by ID",
@@ -227,7 +173,7 @@
       },
       "put": {
         "summary": "Update a product",
-        "description": "Updates a product. Only the owner (by business_id in JWT) can update their products.",
+        "description": "Updates a product.",
         "tags": ["Products"],
         "security": [{ "bearerAuth": [] }],
         "parameters": [
@@ -252,13 +198,12 @@
         },
         "responses": {
           "200": { "description": "Product updated successfully" },
-          "400": { "description": "No business associated with this account" },
           "403": { "description": "Token required" }
         }
       },
       "delete": {
         "summary": "Delete a product",
-        "description": "Deletes a product. Only the owner (by business_id in JWT) can delete their products.",
+        "description": "Deletes a product.",
         "tags": ["Products"],
         "security": [{ "bearerAuth": [] }],
         "parameters": [
@@ -266,7 +211,6 @@
         ],
         "responses": {
           "200": { "description": "Product deleted successfully" },
-          "400": { "description": "No business associated with this account" },
           "403": { "description": "Token required" }
         }
       }
@@ -281,79 +225,33 @@
             "application/json": {
               "schema": {
                 "type": "object",
+                "required": ["person_name", "no_telp", "id_product", "quantity"],
                 "properties": {
                   "person_name": { "type": "string", "example": "John Doe" },
                   "no_telp": { "type": "string", "example": "08123456789" },
                   "id_product": { "type": "array", "items": { "type": "integer" }, "example": [1, 2] },
-                  "quantity": { "type": "array", "items": { "type": "integer" }, "example": [4, 2] }
+                  "quantity": { "type": "array", "items": { "type": "integer" }, "example": [4, 2] },
+                  "seat_id": { "type": "integer", "example": 1, "description": "Required if making a reservation" },
+                  "guest_count": { "type": "integer", "example": 2, "description": "Number of guests" },
+                  "reservation_date": { "type": "string", "format": "date", "example": "2026-05-20", "description": "Required if making a reservation" },
+                  "reservation_time": { "type": "string", "format": "time", "example": "19:00:00", "description": "Required if making a reservation" },
+                  "reservation_end_time": { "type": "string", "format": "time", "example": "21:00:00", "description": "Required if making a reservation" }
                 }
               }
             }
           }
         },
         "responses": {
-          "201": { "description": "Order created successfully" }
+          "201": { "description": "Order created successfully" },
+          "400": { "description": "Missing required fields or invalid data" },
+          "500": { "description": "Server error" }
         }
-      }
-    },
-    "/order/{business_id}": {
+      },
       "get": {
-        "summary": "Get all orders for a business",
+        "summary": "Get all orders",
         "tags": ["Orders"],
-        "parameters": [
-          { "in": "path", "name": "business_id", "required": true, "schema": { "type": "integer" }, "example": 1 }
-        ],
         "responses": {
-          "200": { "description": "Returns array of orders belonging to the specified business" }
-        }
-      }
-    },
-    "/umkm/business": {
-      "put": {
-        "summary": "Update business",
-        "description": "Updates the business associated with the authenticated user's account (via id_business in JWT).",
-        "tags": ["UMKM"],
-        "security": [{ "bearerAuth": [] }],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "name": { "type": "string", "example": "Warung Kopi Baru" },
-                  "alamat": { "type": "string", "example": "Jl. Baru No. 10" },
-                  "category": { "type": "string", "example": "Food & Beverage" },
-                  "helder": { "type": "string", "example": "John Doe" },
-                  "description": { "type": "string", "example": "Updated business description" },
-                  "email": { "type": "string", "example": "new@example.com" },
-                  "instagram": { "type": "string", "example": "@newhandle" },
-                  "no_telp": { "type": "string", "example": "08198765432" },
-                  "province": { "type": "string", "example": "Jawa Barat" },
-                  "regency": { "type": "string", "example": "Bandung" },
-                  "district": { "type": "string", "example": "Coblong" },
-                  "logo_image_url": { "type": "string", "example": "https://res.cloudinary.com/.../logos/logo123.jpg" }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": { "description": "Business updated successfully" },
-          "400": { "description": "No business associated with this account" },
-          "403": { "description": "Token required" }
-        }
-      }
-    },
-    "/umkm/{id}": {
-      "get": {
-        "summary": "Get UMKM (Business) by ID",
-        "tags": ["UMKM"],
-        "parameters": [
-          { "in": "path", "name": "id", "required": true, "schema": { "type": "integer" }, "example": 1 }
-        ],
-        "responses": {
-          "200": { "description": "Returns UMKM details" }
+          "200": { "description": "Returns array of orders" }
         }
       }
     }

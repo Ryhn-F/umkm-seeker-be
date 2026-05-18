@@ -42,10 +42,10 @@ const getProductById = async (req, res) => {
 
 const createProduct = async (req, res) => {
   try {
-    const { business_id, name, stock, price, description, category } = req.body;
+    const { name, stock, price, description, category } = req.body;
 
     // Validation
-    if (!business_id || !name || stock === undefined || price === undefined || !description || !category) {
+    if (!name || stock === undefined || price === undefined || !description || !category) {
       return res.status(400).json({
         success: false,
         message: "Missing required fields",
@@ -55,7 +55,7 @@ const createProduct = async (req, res) => {
     // Get the Cloudinary URL from the uploaded file
     const image_url = req.file ? req.file.path : null;
 
-    const payload = { business_id, name, stock, price, description, image_url, category };
+    const payload = { name, stock, price, description, image_url, category };
     const product = await productServices.createProduct(payload);
 
     res.status(201).json({
@@ -71,37 +71,12 @@ const createProduct = async (req, res) => {
   }
 };
 
-const getProductsByBusinessId = async (req, res) => {
-  try {
-    const { businessId } = req.params;
-    const products = await productServices.getProductsByBusinessId(businessId);
-
-    res.status(200).json({
-      success: true,
-      data: products,
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
-  }
-};
-
 const updateProduct = async (req, res) => {
   try {
     const { id } = req.params;
-    const { id_business } = req.user;
-
-    if (!id_business) {
-      return res.status(400).json({
-        success: false,
-        message: "No business associated with this account",
-      });
-    }
 
     const updateData = req.body;
-    const product = await productServices.updateProduct(id, id_business, updateData);
+    const product = await productServices.updateProduct(id, updateData);
 
     res.status(200).json({
       success: true,
@@ -119,16 +94,8 @@ const updateProduct = async (req, res) => {
 const deleteProduct = async (req, res) => {
   try {
     const { id } = req.params;
-    const { id_business } = req.user;
 
-    if (!id_business) {
-      return res.status(400).json({
-        success: false,
-        message: "No business associated with this account",
-      });
-    }
-
-    await productServices.deleteProduct(id, id_business);
+    await productServices.deleteProduct(id);
 
     res.status(200).json({
       success: true,
@@ -146,7 +113,6 @@ module.exports = {
   getProducts,
   getProductById,
   createProduct,
-  getProductsByBusinessId,
   updateProduct,
   deleteProduct,
 };

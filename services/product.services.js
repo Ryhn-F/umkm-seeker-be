@@ -17,7 +17,7 @@ const getProductById = async (id) => {
     .from("products")
     .select("*")
     .eq("id", id)
-    .single();
+    .maybeSingle();
 
   if (error) {
     throw new Error(error.message);
@@ -31,7 +31,6 @@ const createProduct = async (payload) => {
     .from("products")
     .insert([
       {
-        business_id: payload.business_id,
         name: payload.name,
         stock: payload.stock,
         price: payload.price,
@@ -50,27 +49,13 @@ const createProduct = async (payload) => {
   return data;
 };
 
-const getProductsByBusinessId = async (businessId) => {
-  const { data, error } = await supabase
-    .from("products")
-    .select("*, business:businesses!business_id(province, regency, district)")
-    .eq("business_id", businessId);
-
-  if (error) {
-    throw new Error(error.message);
-  }
-
-  return data;
-};
-
-const updateProduct = async (productId, businessId, updateData) => {
+const updateProduct = async (productId, updateData) => {
   const { data, error } = await supabase
     .from("products")
     .update(updateData)
     .eq("id", productId)
-    .eq("business_id", businessId)
     .select("*")
-    .single();
+    .maybeSingle();
 
   if (error) {
     throw new Error(error.message);
@@ -79,14 +64,13 @@ const updateProduct = async (productId, businessId, updateData) => {
   return data;
 };
 
-const deleteProduct = async (productId, businessId) => {
+const deleteProduct = async (productId) => {
   const { data, error } = await supabase
     .from("products")
     .delete()
     .eq("id", productId)
-    .eq("business_id", businessId)
     .select("*")
-    .single();
+    .maybeSingle();
 
   if (error) {
     throw new Error(error.message);
@@ -99,7 +83,6 @@ module.exports = {
   getProducts,
   getProductById,
   createProduct,
-  getProductsByBusinessId,
   updateProduct,
   deleteProduct,
 };
