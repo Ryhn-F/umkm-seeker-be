@@ -95,7 +95,68 @@ const getOrders = async (req, res) => {
   }
 };
 
+const updateOrder = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { 
+      person_name, 
+      no_telp, 
+      seat_id,
+      guest_count,
+      reservation_date,
+      reservation_time,
+      reservation_end_time,
+      status 
+    } = req.body;
+
+    const orderData = {};
+    if (person_name) orderData.person_name = person_name;
+    if (no_telp) orderData.no_telp = no_telp;
+    if (seat_id !== undefined) orderData.seat_id = seat_id;
+    if (guest_count !== undefined) orderData.guest_count = guest_count;
+    if (reservation_date !== undefined) orderData.reservation_date = reservation_date;
+    if (reservation_time !== undefined) orderData.reservation_time = reservation_time;
+    if (reservation_end_time !== undefined) orderData.reservation_end_time = reservation_end_time;
+    if (status) orderData.status = status;
+
+    const order = await orderServices.updateOrder(id, orderData);
+
+    res.status(200).json({
+      success: true,
+      message: "Order updated successfully",
+      data: order,
+    });
+  } catch (error) {
+    const status = error.message === "Order not found" ? 404 : 500;
+    res.status(status).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+const deleteOrder = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    await orderServices.deleteOrder(id);
+
+    res.status(200).json({
+      success: true,
+      message: "Order deleted successfully",
+    });
+  } catch (error) {
+    const status = error.message === "Order not found" ? 404 : 500;
+    res.status(status).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 module.exports = {
   createOrder,
   getOrders,
+  updateOrder,
+  deleteOrder,
 };

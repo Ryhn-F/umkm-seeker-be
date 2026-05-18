@@ -176,7 +176,50 @@ const getOrders = async () => {
   return orders;
 };
 
+const updateOrder = async (id, orderData) => {
+  const { data, error } = await supabase
+    .from("orders")
+    .update(orderData)
+    .eq("id", id)
+    .select()
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  if (!data) {
+    throw new Error("Order not found");
+  }
+
+  return data;
+};
+
+const deleteOrder = async (id) => {
+  // First, delete associated order items to avoid foreign key constraints
+  await supabase.from("order_items").delete().eq("order_id", id);
+
+  const { data, error } = await supabase
+    .from("orders")
+    .delete()
+    .eq("id", id)
+    .select()
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  if (!data) {
+    throw new Error("Order not found");
+  }
+
+  return data;
+};
+
 module.exports = {
   createOrder,
   getOrders,
+  updateOrder,
+  deleteOrder,
 };

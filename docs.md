@@ -171,3 +171,137 @@ Retrieves all orders along with associated items, products, and seat details.
 
 **Responses:**
 - `200 OK`: Returns an array of orders, sorted from newest to oldest. Includes populated `order_items`, `products`, and `seats` data.
+
+### 3. Update Order
+Updates an existing order's details.
+
+**Endpoint:** `PUT /order/:id`
+
+**Request Body:**
+```json
+{
+  "person_name": "Jane Doe",
+  "status": "completed"
+}
+```
+
+**Responses:**
+- `200 OK`: Order updated successfully.
+- `404 Not Found`: Order not found.
+- `500 Internal Server Error`: Server error.
+
+### 4. Delete Order
+Deletes an existing order and its associated order items.
+
+**Endpoint:** `DELETE /order/:id`
+
+**Responses:**
+- `200 OK`: Order deleted successfully.
+- `404 Not Found`: Order not found.
+- `500 Internal Server Error`: Server error.
+
+---
+
+## Seats APIs
+
+### 1. Get All Seats
+
+Retrieves all available seats and tables.
+
+**Endpoint:** `GET /seat`
+
+**Responses:**
+
+- `200 OK`: Returns an array of seats containing `id`, `seat_number`, `capacity`, and `status`.
+
+### 2. Create Seat
+
+Creates a new seat.
+
+**Endpoint:** `POST /seat`
+
+**Request Body:**
+
+```json
+{
+  "seat_number": "A1", // Required
+  "capacity": 4, // Required
+  "status": "available" // Optional, default is 'available'
+}
+```
+
+**Responses:**
+
+- `201 Created`: Seat created successfully.
+- `400 Bad Request`: Missing required fields.
+- `500 Internal Server Error`: Seat number already exists or other error.
+
+### 3. Update Seat
+
+Updates an existing seat's details.
+
+**Endpoint:** `PUT /seat/:id`
+
+**Request Body:**
+
+```json
+{
+  "seat_number": "A1",
+  "capacity": 6,
+  "status": "reserved"
+}
+```
+
+**Responses:**
+
+- `200 OK`: Seat updated successfully.
+- `404 Not Found`: Seat not found.
+- `500 Internal Server Error`: Server error.
+
+### 4. Delete Seat
+
+Deletes an existing seat.
+
+**Endpoint:** `DELETE /seat/:id`
+
+**Responses:**
+
+- `200 OK`: Seat deleted successfully.
+- `404 Not Found`: Seat not found.
+- `500 Internal Server Error`: Server error.
+
+---
+
+## Testimonial APIs
+
+### 1. Get All Testimonials
+
+Retrieves all testimonials.
+
+**Endpoint:** `GET /testimonial`
+
+**Responses:**
+
+- `200 OK`: Returns an array of testimonials containing `id`, `name`, and `message`.
+- `500 Internal Server Error`: Server error.
+
+### 2. Create Testimonial
+
+Creates a new testimonial.
+
+**Endpoint:** `POST /testimonial`
+
+**Request Body:**
+
+```json
+{
+  "name": "John Doe", // Required
+  "message": "Great coffee and nice place!" // Required
+}
+```
+
+**Responses:**
+
+- `201 Created`: Testimonial created successfully.
+- `400 Bad Request`: Missing required fields (`name`, `message`).
+- `500 Internal Server Error`: Server error.

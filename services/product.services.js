@@ -3,7 +3,7 @@ const supabase = require("../config/supabase");
 const getProducts = async () => {
   const { data, error } = await supabase
     .from("products")
-    .select("id, name, image_url, category, price");
+    .select("id, name, image_url, category, price, stock");
 
   if (error) {
     throw new Error(error.message);
