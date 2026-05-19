@@ -94,23 +94,20 @@ Creates a new product. Requires a valid JWT token.
 - `403 Forbidden`: Token required.
 
 ### 4. Update Product
-Updates an existing product. Requires a valid JWT token.
+Updates an existing product. Requires a valid JWT token. If a new image is provided, the old image is automatically deleted from Cloudinary and replaced with the new one.
 
 **Endpoint:** `PUT /product/:id`
 **Headers:**
 - `Authorization: Bearer <token>`
-- `Content-Type: application/json`
+- `Content-Type: multipart/form-data`
 
-**Request Body (JSON):**
-```json
-{
-  "name": "Kopi Susu Updated",
-  "stock": 50,
-  "price": 18000,
-  "description": "Updated description",
-  "category": "Beverage"
-}
-```
+**Request Body (FormData):**
+- `name` (string, optional)
+- `stock` (integer, optional)
+- `price` (number, optional)
+- `description` (string, optional)
+- `category` (string, optional)
+- `image` (file, optional) - New image file for the product (jpg, jpeg, png, webp). If provided, the old image will be deleted from Cloudinary.
 
 **Responses:**
 - `200 OK`: Product updated successfully.

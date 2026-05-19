@@ -173,7 +173,7 @@
       },
       "put": {
         "summary": "Update a product",
-        "description": "Updates a product.",
+        "description": "Updates a product. If a new image is provided, the old image is automatically deleted from Cloudinary and replaced.",
         "tags": ["Products"],
         "security": [{ "bearerAuth": [] }],
         "parameters": [
@@ -182,7 +182,7 @@
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": {
+            "multipart/form-data": {
               "schema": {
                 "type": "object",
                 "properties": {
@@ -190,7 +190,8 @@
                   "stock": { "type": "integer", "example": 50 },
                   "price": { "type": "number", "example": 18000 },
                   "description": { "type": "string", "example": "Updated description" },
-                  "category": { "type": "string", "example": "Beverage" }
+                  "category": { "type": "string", "example": "Beverage" },
+                  "image": { "type": "string", "format": "binary", "description": "New product image file (jpg, jpeg, png, webp). Optional. If provided, the old image is deleted from Cloudinary." }
                 }
               }
             }

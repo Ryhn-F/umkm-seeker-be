@@ -1,4 +1,5 @@
 const productServices = require("../services/product.services");
+const { cloudinary } = require("../config/cloudinary");
 
 const getProducts = async (req, res) => {
   try {
@@ -74,8 +75,30 @@ const createProduct = async (req, res) => {
 const updateProduct = async (req, res) => {
   try {
     const { id } = req.params;
-
     const updateData = req.body;
+
+    // If a new image was uploaded, handle Cloudinary replacement
+    if (req.file) {
+      // Fetch the existing product to get the old image URL
+      const existingProduct = await productServices.getProductById(id);
+
+      if (existingProduct && existingProduct.image_url) {
+        // Extract the public_id from the old Cloudinary URL
+        // URL format: https://res.cloudinary.com/<cloud>/image/upload/v123/folder/filename.ext
+        const urlParts = existingProduct.image_url.split("/");
+        const uploadIndex = urlParts.indexOf("upload");
+        // public_id is everything after "upload/vXXX/" without the file extension
+        const publicIdWithExt = urlParts.slice(uploadIndex + 2).join("/");
+        const publicId = publicIdWithExt.replace(/\.[^/.]+$/, "");
+
+        // Delete the old image from Cloudinary
+        await cloudinary.uploader.destroy(publicId);
+      }
+
+      // Set the new image URL from the uploaded file
+      updateData.image_url = req.file.path;
+    }
+
     const product = await productServices.updateProduct(id, updateData);
 
     res.status(200).json({
